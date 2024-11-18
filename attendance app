@@ -1,0 +1,160 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <ctime>
+#include <algorithm>
+
+// Structs to represent entities
+struct Student {
+    int id;
+    std::string name;
+    std::string roll;
+};
+
+struct Subject {
+    int id;
+    std::string name;
+    std::string code;
+};
+
+struct TimetableEntry {
+    int id;
+    std::string day;
+    std::string subject;
+    std::string time; // Format HH:MM
+};
+
+// Data storage
+std::vector<Student> students;
+std::vector<Subject> subjects;
+std::vector<TimetableEntry> timetable;
+
+// Utility Functions
+void showMenu();
+void addStudent();
+void addSubject();
+void addTimetableEntry();
+void viewStudents();
+void viewSubjects();
+void viewTimetable();
+void setupClassReminders();
+std::string getCurrentDay();
+
+// Main Function
+int main() {
+    int choice;
+    while (true) {
+        showMenu();
+        std::cin >> choice;
+        switch (choice) {
+            case 1: addStudent(); break;
+            case 2: addSubject(); break;
+            case 3: addTimetableEntry(); break;
+            case 4: viewStudents(); break;
+            case 5: viewSubjects(); break;
+            case 6: viewTimetable(); break;
+            case 7: setupClassReminders(); break;
+            case 0: std::cout << "Exiting...\n"; return 0;
+            default: std::cout << "Invalid choice. Try again.\n";
+        }
+    }
+}
+
+// Function Definitions
+void showMenu() {
+    std::cout << "\n=== College Attendance System ===\n";
+    std::cout << "1. Add Student\n";
+    std::cout << "2. Add Subject\n";
+    std::cout << "3. Add Timetable Entry\n";
+    std::cout << "4. View Students\n";
+    std::cout << "5. View Subjects\n";
+    std::cout << "6. View Timetable\n";
+    std::cout << "7. Check Class Reminders\n";
+    std::cout << "0. Exit\n";
+    std::cout << "Enter your choice: ";
+}
+
+void addStudent() {
+    Student s;
+    s.id = students.size() + 1;
+    std::cout << "Enter student name: ";
+    std::cin.ignore();
+    std::getline(std::cin, s.name);
+    std::cout << "Enter roll number: ";
+    std::getline(std::cin, s.roll);
+    students.push_back(s);
+    std::cout << "Student added successfully.\n";
+}
+
+void addSubject() {
+    Subject sub;
+    sub.id = subjects.size() + 1;
+    std::cout << "Enter subject name: ";
+    std::cin.ignore();
+    std::getline(std::cin, sub.name);
+    std::cout << "Enter subject code: ";
+    std::getline(std::cin, sub.code);
+    subjects.push_back(sub);
+    std::cout << "Subject added successfully.\n";
+}
+
+void addTimetableEntry() {
+    TimetableEntry entry;
+    entry.id = timetable.size() + 1;
+    std::cout << "Enter day (e.g., Monday): ";
+    std::cin.ignore();
+    std::getline(std::cin, entry.day);
+    std::cout << "Enter subject: ";
+    std::getline(std::cin, entry.subject);
+    std::cout << "Enter time (HH:MM): ";
+    std::getline(std::cin, entry.time);
+    timetable.push_back(entry);
+    std::cout << "Timetable entry added successfully.\n";
+}
+
+void viewStudents() {
+    std::cout << "\n=== Students List ===\n";
+    for (const auto& s : students) {
+        std::cout << s.id << ". " << s.name << " (" << s.roll << ")\n";
+    }
+}
+
+void viewSubjects() {
+    std::cout << "\n=== Subjects List ===\n";
+    for (const auto& sub : subjects) {
+        std::cout << sub.id << ". " << sub.name << " (" << sub.code << ")\n";
+    }
+}
+
+void viewTimetable() {
+    std::cout << "\n=== Timetable ===\n";
+    for (const auto& entry : timetable) {
+        std::cout << entry.id << ". " << entry.day << " - " << entry.subject << " at " << entry.time << "\n";
+    }
+}
+
+std::string getCurrentDay() {
+    time_t now = time(0);
+    tm* localTime = localtime(&now);
+    std::vector<std::string> days = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    return days[localTime->tm_wday];
+}
+
+void setupClassReminders() {
+    std::string currentDay = getCurrentDay();
+    time_t now = time(0);
+    tm* localTime = localtime(&now);
+
+    std::cout << "\n=== Class Reminders ===\n";
+    for (const auto& entry : timetable) {
+        if (entry.day == currentDay) {
+            int entryHour, entryMinute;
+            sscanf(entry.time.c_str(), "%d:%d", &entryHour, &entryMinute);
+
+            if (localTime->tm_hour == entryHour && std::abs(localTime->tm_min - entryMinute) <= 10) {
+                std::cout << "Reminder: You have a " << entry.subject << " class at " << entry.time << "!\n";
+            }
+        }
+    }
+}
